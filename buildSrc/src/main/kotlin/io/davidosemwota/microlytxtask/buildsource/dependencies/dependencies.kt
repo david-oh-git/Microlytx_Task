@@ -1,11 +1,16 @@
 @file:Suppress("SpellCheckingInspection")
-package io.davidosemwota.microlytxtask.buildsource
+package io.davidosemwota.microlytxtask.buildsource.dependencies
 
 /**
  * All depencies in one location
  */
 object Libs {
 
+    object Versions {
+        const val ktLint = "0.40.0"
+    }
+
+    const val ktlint = "com.pinterest:ktlint:${Versions.ktLint}"
 
     object AndroidGradlePlugin {
         private const val version = "4.1.2"

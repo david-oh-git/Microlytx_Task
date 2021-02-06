@@ -1,4 +1,4 @@
-import io.davidosemwota.microlytxtask.buildsource.Libs
+import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
 
 plugins {
     id 'com.android.application'
@@ -41,4 +41,5 @@ dependencies {
     implementation Libs.AndroidX.AppCompat.appCompat
     implementation Libs.AndroidX.MaterialComponents.material_components
     implementation Libs.AndroidX.ConstraintLayout.constraint_layout
+    implementation Libs.Kotlin.Coroutines.android
 }
