@@ -43,3 +43,5 @@ dependencies {
     implementation Libs.AndroidX.ConstraintLayout.constraint_layout
     implementation Libs.Kotlin.Coroutines.android
 }
+
+apply from: "$rootProject.projectDir/gradle/ktlint.gradle"
