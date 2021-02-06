@@ -1,0 +1,22 @@
+import io.davidosemwota.microlytxtask.buildsource.utils.SystemOSUtilsKt
+// Task to copy files from git-hooks to .get/hooks/
+task copyGitHooks(type: Copy) {
+    description 'Copies the git hooks from ../git-hooks to the .git folder.'
+    from("${rootDir}scripts/git-hooks/") {
+        include '**/*.sh'
+        rename '(.*).sh', '$1'
+    }
+    into "${rootDir}/.git/hooks"
+//    onlyIf { isLinuxOrMacOs() }
+}
+
+task installGitHooks(type: Exec) {
+    description 'Installs the pre-commit git hooks from ../git-hooks.'
+    group 'git hooks'
+    workingDir rootDir
+    commandLine 'chmod'
+    args '-R', '+x', '.git/hooks/'
+    onlyIf { SystemOSUtilsKt.isLinuxOrMacOs() }
+    dependsOn copyGitHooks
+
+}

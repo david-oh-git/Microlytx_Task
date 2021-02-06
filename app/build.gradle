@@ -33,6 +33,17 @@ android {
         jvmTarget = '1.8'
     }
 
+    lintOptions {
+        lintConfig file(".lint/config.xml")
+        checkAllWarnings true
+        warningsAsErrors true
+    }
+
+    // Executes installGitHooks tasks after clean task is executed.
+    afterEvaluate {
+        clean.dependsOn installGitHooks
+    }
+
 }
 
 dependencies {
@@ -45,3 +56,5 @@ dependencies {
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"
+apply from: "$rootProject.projectDir/gradle/git-hooks.gradle"
+check.dependsOn ktlint
