@@ -1,4 +1,15 @@
 import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
+import io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig
+
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.application_id
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.build_tools_version
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.compile_sdk_version
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.minimum_sdk_version
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.target_sdk_version
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.test_instrumentation_runner
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.version_code
+import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.version_name
+
 
 plugins {
     id 'com.android.application'
@@ -6,20 +17,32 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion compile_sdk_version
+    buildToolsVersion build_tools_version
 
     defaultConfig {
-        applicationId "io.davidosemwota.microlytxtask"
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        applicationId application_id
+        minSdkVersion minimum_sdk_version
+        targetSdkVersion target_sdk_version
+        versionCode version_code
+        versionName version_name
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner test_instrumentation_runner
     }
 
+//    signingConfigs {
+//        debug {
+//            storeFile rootProject.file("ulesson_debug.jks")
+//            storeFile 'android'
+//            keyAlias 'android'
+//            keyPassword 'android'
+//        }
+//    }
     buildTypes {
+//        debug {
+//            applicationIdSuffix BuildTypeDebug.applicationIdSuffix
+//            signingConfigs = BuildType.debug
+//        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -39,10 +62,14 @@ android {
         warningsAsErrors true
     }
 
-    // Executes installGitHooks tasks after clean task is executed.
-    afterEvaluate {
-        clean.dependsOn installGitHooks
+    buildFeatures {
+        viewBinding true
     }
+
+//    // Executes installGitHooks tasks after clean task is executed.
+//    afterEvaluate {
+//        clean.dependsOn installGitHooks
+//    }
 
 }
 
@@ -53,8 +80,9 @@ dependencies {
     implementation Libs.AndroidX.MaterialComponents.material_components
     implementation Libs.AndroidX.ConstraintLayout.constraint_layout
     implementation Libs.Kotlin.Coroutines.android
+    implementation Libs.AndroidX.Navigation.navigation_fragment
+    implementation Libs.AndroidX.Navigation.navigation_ui
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"
-apply from: "$rootProject.projectDir/gradle/git-hooks.gradle"
 check.dependsOn ktlint

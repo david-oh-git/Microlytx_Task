@@ -1,8 +1,10 @@
 import io.davidosemwota.microlytxtask.buildsource.utils.SystemOSUtilsKt
+import io.davidosemwota.microlytxtask.buildsource.BuildTaskGroups
 // Task to copy files from git-hooks to .get/hooks/
 task copyGitHooks(type: Copy) {
     description 'Copies the git hooks from ../git-hooks to the .git folder.'
-    from("${rootDir}scripts/git-hooks/") {
+    group BuildTaskGroups.git_hooks
+    from("${rootDir}/scripts/git-hooks/") {
         include '**/*.sh'
         rename '(.*).sh', '$1'
     }
@@ -12,11 +14,23 @@ task copyGitHooks(type: Copy) {
 
 task installGitHooks(type: Exec) {
     description 'Installs the pre-commit git hooks from ../git-hooks.'
-    group 'git hooks'
+    group BuildTaskGroups.git_hooks
     workingDir rootDir
     commandLine 'chmod'
     args '-R', '+x', '.git/hooks/'
     onlyIf { SystemOSUtilsKt.isLinuxOrMacOs() }
     dependsOn copyGitHooks
+    doLast {
+        logger.info('Git hook installed successfully.')
+    }
 
 }
+
+task deleteGitHooks(type: Delete) {
+    description 'Delete the pre-commit git hooks.'
+    group BuildTaskGroups.git_hooks
+    delete(".git/hooks")
+}
+
+
+

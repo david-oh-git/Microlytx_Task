@@ -8,9 +8,11 @@ object Libs {
 
     object Versions {
         const val ktLint = "0.40.0"
+        const val spotless = "5.7.0"
     }
 
     const val ktlint = "com.pinterest:ktlint:${Versions.ktLint}"
+    const val spotless = "com.diffplug.spotless:spotless-plugin-gradle:${Versions.spotless}"
 
     object AndroidGradlePlugin {
         private const val version = "4.1.2"

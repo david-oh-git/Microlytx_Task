@@ -3,6 +3,7 @@
 import io.davidosemwota.microlytxtask.buildsource.BuildPlugins
 import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
 
+apply from: "$rootProject.projectDir/gradle/git-hooks.gradle"
 buildscript {
     repositories {
         google()
@@ -12,23 +13,19 @@ buildscript {
         classpath Libs.AndroidGradlePlugin.androidGradlePlugin
         classpath Libs.Kotlin.gradle_plugin
         classpath Libs.ktlint
+        classpath Libs.spotless
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+
 }
 
-plugins {
-    id 'com.diffplug.spotless' version '5.7.0'
-}
 
 subprojects {
     repositories {
         google()
         jcenter()
-//        mavenCentral()
-
-//        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
 
     apply plugin: BuildPlugins.spotless
@@ -62,4 +59,10 @@ subprojects {
             jvmTarget = "1.8"
         }
     }
+
+    afterEvaluate {
+        tasks['clean'].dependsOn installGitHooks
+        tasks['assemble'].dependsOn installGitHooks
+    }
 }
+
