@@ -82,6 +82,7 @@ dependencies {
     implementation Libs.Kotlin.Coroutines.android
     implementation Libs.AndroidX.Navigation.navigation_fragment
     implementation Libs.AndroidX.Navigation.navigation_ui
+    implementation Libs.AndroidX.Fragment.fragment
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"

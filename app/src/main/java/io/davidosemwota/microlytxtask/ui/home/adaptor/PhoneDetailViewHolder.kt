@@ -21,17 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.davidosemwota.microlytxtask
+package io.davidosemwota.microlytxtask.ui.home.adaptor
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
+import android.view.LayoutInflater
+import io.davidosemwota.microlytxtask.data.PhoneDetail
+import io.davidosemwota.microlytxtask.databinding.ItemPhoneDetailBinding
+import io.davidosemwota.microlytxtask.ui.base.BaseViewHolder
 
-class MainActivity : AppCompatActivity() {
+class PhoneDetailViewHolder(
+    layoutInflater: LayoutInflater
+) : BaseViewHolder<ItemPhoneDetailBinding>(
+    binding = ItemPhoneDetailBinding.inflate(layoutInflater)
+) {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    fun bind(phoneDetail: PhoneDetail) {
+        binding.title.text = phoneDetail.title
+        binding.subTitle.text = phoneDetail.subTitle
     }
 }

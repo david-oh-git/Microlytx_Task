@@ -21,17 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.davidosemwota.microlytxtask
+package io.davidosemwota.microlytxtask.ui.home.adaptor
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import io.davidosemwota.microlytxtask.data.PhoneDetail
+import io.davidosemwota.microlytxtask.ui.base.BaseListAdaptor
 
-class MainActivity : AppCompatActivity() {
+class PhoneDetailAdaptor : BaseListAdaptor<PhoneDetail>(
+    itemsSame = { old, new -> old.title == new.title },
+    contentsSame = { old, new -> old == new }
+) {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        inflater: LayoutInflater,
+        viewType: Int
+    ) = PhoneDetailViewHolder(inflater)
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is PhoneDetailViewHolder -> holder.bind(getItem(position))
+        }
     }
 }

@@ -23,17 +23,43 @@
  */
 package io.davidosemwota.microlytxtask.ui.home
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.telephony.CellInfoGsm
+import android.telephony.TelephonyManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import io.davidosemwota.microlytxtask.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
+    private val TAG = "HomeFragment"
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted app workflow continues.
+            } else {
+                //
+            }
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        checkForPermission()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,9 +71,88 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setUpViews()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
         _binding = null
+    }
+
+    private fun setUpViews() {
+
+        val tm = requireContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+//        val mobileCountryCode = tm.networkCountryIso
+//        val mobileNetworkCode = tm.networkOperator
+//        val simOperator = tm.simOperator
+//        val simCountryIso = tm.simCountryIso
+
+        if (isPermissionGranted()) {
+            Log.d("HomeFragment", "permission granted")
+            val cellLocation = tm.allCellInfo
+            for (info in cellLocation) {
+                when (info) {
+                    is CellInfoGsm -> {
+                        val identityGsm = info.cellIdentity
+                        val lac = identityGsm.lac
+                        binding.testMsg.text = "LAC is : $lac"
+                    }
+
+                    else -> {
+                        Log.d("HomeFragment", "nothing matched")
+                    }
+                }
+            }
+        } else {
+            Log.d("HomeFragment", "permission not granted")
+        }
+    }
+
+    private fun requestPermission() {
+        requestPermissionLauncher.launch(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
+
+    private fun isPermissionGranted(): Boolean =
+        ContextCompat.checkSelfPermission(
+            requireContext().applicationContext,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun checkForPermission() {
+        when {
+            isPermissionGranted() -> {
+            }
+
+            shouldShowRequestPermissionRationale(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                showInContextUI()
+            }
+
+            else -> {
+                requestPermission()
+            }
+        }
+    }
+
+    private fun showInContextUI() {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setMessage("We need your permission")
+            .setNegativeButton("Cancel") {
+                _, _ ->
+                requireActivity().finish()
+            }
+            .setPositiveButton("Agree") {
+                _, _ ->
+                requestPermission()
+            }
+            .create()
+        dialog.show()
     }
 }

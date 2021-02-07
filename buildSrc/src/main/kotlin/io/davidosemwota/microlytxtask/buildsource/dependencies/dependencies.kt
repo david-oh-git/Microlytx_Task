@@ -54,6 +54,11 @@ object Libs {
             const val paging = "androidx.paging:paging-runtime-ktx:$version"
         }
 
+        object Fragment {
+            private const val version = "1.3.0-rc02"
+            const val fragment = "androidx.fragment:fragment-ktx:$version"
+        }
+
         object Room {
             private const val version = "2.1.2"
             const val room = "androidx.room:room-runtime:$version"

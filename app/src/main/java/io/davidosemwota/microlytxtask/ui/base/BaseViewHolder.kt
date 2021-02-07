@@ -21,17 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.davidosemwota.microlytxtask
+package io.davidosemwota.microlytxtask.ui.base
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 
-class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-    }
-}
+/**
+ * Base view holder
+ *
+ * @param binding Data binding generated for the layout.
+ */
+abstract class BaseViewHolder<T : ViewBinding>(
+    val binding: T
+) : RecyclerView.ViewHolder(binding.root)

@@ -21,17 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.davidosemwota.microlytxtask
+package io.davidosemwota.microlytxtask.ui.extentions
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
+import androidx.recyclerview.widget.RecyclerView
+import io.davidosemwota.microlytxtask.ui.RecyclerViewItemDecoration
 
-class MainActivity : AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-    }
+/**
+ * Add an [RecyclerViewItemDecoration] to this RecyclerView.
+ *
+ * @param spacingPx Spacing in pixels to set as a item margin.
+ */
+fun RecyclerView.setItemDecorationSpacing(spacingPx: Float) {
+    addItemDecoration(
+        RecyclerViewItemDecoration(spacingPx.toInt())
+    )
 }
