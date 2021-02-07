@@ -38,7 +38,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import io.davidosemwota.microlytxtask.R
+import io.davidosemwota.microlytxtask.data.PhoneDetail
 import io.davidosemwota.microlytxtask.databinding.FragmentHomeBinding
+import io.davidosemwota.microlytxtask.ui.extentions.observe
+import io.davidosemwota.microlytxtask.ui.extentions.setItemDecorationSpacing
+import io.davidosemwota.microlytxtask.ui.home.adaptor.PhoneDetailAdaptor
 
 class HomeFragment : Fragment() {
 
@@ -58,6 +63,7 @@ class HomeFragment : Fragment() {
         }
 
     private val viewModel: HomeViewModel by viewModels()
+    private val phoneDetailAdaptor   by lazy { PhoneDetailAdaptor() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +83,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        observe(viewModel.listOfPhoneDetails, ::onDataChange)
         setUpViews()
     }
 
@@ -87,6 +94,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setUpViews() {
+        setUpRecyclerView()
 
         val tm = requireContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 //        val mobileCountryCode = tm.networkCountryIso
@@ -102,7 +110,9 @@ class HomeFragment : Fragment() {
                     is CellInfoGsm -> {
                         val identityGsm = info.cellIdentity
                         val lac = identityGsm.lac
-                        binding.testMsg.text = "LAC is : $lac"
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("LAC", lac.toString())
+                        )
                     }
 
                     else -> {
@@ -157,5 +167,18 @@ class HomeFragment : Fragment() {
             }
             .create()
         dialog.show()
+    }
+
+    private fun onDataChange(data: List<PhoneDetail>) {
+        phoneDetailAdaptor.submitList(data)
+    }
+
+    private fun setUpRecyclerView() {
+        binding.includePhoneDetailList.phoneDetailList.apply {
+            this.adapter = phoneDetailAdaptor
+            setItemDecorationSpacing(
+                resources.getDimension(R.dimen.view_phone_detail_list_item_padding)
+            )
+        }
     }
 }
