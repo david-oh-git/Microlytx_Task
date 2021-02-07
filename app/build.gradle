@@ -83,6 +83,7 @@ dependencies {
     implementation Libs.AndroidX.Navigation.navigation_fragment
     implementation Libs.AndroidX.Navigation.navigation_ui
     implementation Libs.AndroidX.Fragment.fragment
+    implementation Libs.AndroidX.livedataktx
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"

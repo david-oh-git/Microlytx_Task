@@ -37,6 +37,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import io.davidosemwota.microlytxtask.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -55,6 +56,8 @@ class HomeFragment : Fragment() {
                 //
             }
         }
+
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

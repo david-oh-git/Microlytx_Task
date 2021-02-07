@@ -9,6 +9,7 @@ object Libs {
     object Versions {
         const val ktLint = "0.40.0"
         const val spotless = "5.7.0"
+        const val lifecycle = "2.2.0"
     }
 
     const val ktlint = "com.pinterest:ktlint:${Versions.ktLint}"
@@ -48,6 +49,8 @@ object Libs {
     }
 
     object AndroidX {
+
+        const val livedataktx = "androidx.lifecycle:lifecycle-livedata-ktx:${Versions.lifecycle}"
 
         object Paging {
             private const val version = ""
