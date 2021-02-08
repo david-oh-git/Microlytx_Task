@@ -26,6 +26,7 @@ package io.davidosemwota.microlytxtask.ui.home
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.telephony.CellInfoGsm
 import android.telephony.TelephonyManager
@@ -63,7 +64,7 @@ class HomeFragment : Fragment() {
         }
 
     private val viewModel: HomeViewModel by viewModels()
-    private val phoneDetailAdaptor   by lazy { PhoneDetailAdaptor() }
+    private val phoneDetailAdaptor by lazy { PhoneDetailAdaptor() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,14 +98,32 @@ class HomeFragment : Fragment() {
         setUpRecyclerView()
 
         val tm = requireContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-//        val mobileCountryCode = tm.networkCountryIso
-//        val mobileNetworkCode = tm.networkOperator
+        val mobileCountryCode = tm.networkCountryIso
+        val mobileNetworkCode = tm.networkOperator
+        val networkOperator = tm.simOperatorName
+        viewModel.addPhoneDetail(
+            PhoneDetail("Mobile Country Code (MCC)", mobileCountryCode)
+        )
+        viewModel.addPhoneDetail(
+            PhoneDetail("Mobile Network Code (MNC)", mobileNetworkCode)
+        )
+        viewModel.addPhoneDetail(
+            PhoneDetail("Operator Name", networkOperator)
+        )
+        viewModel.addPhoneDetail(
+            PhoneDetail("Handset Make", Build.MANUFACTURER)
+        )
+        viewModel.addPhoneDetail(
+            PhoneDetail("Item Model", Build.MODEL)
+        )
+
 //        val simOperator = tm.simOperator
 //        val simCountryIso = tm.simCountryIso
 
         if (isPermissionGranted()) {
             Log.d("HomeFragment", "permission granted")
             val cellLocation = tm.allCellInfo
+
             for (info in cellLocation) {
                 when (info) {
                     is CellInfoGsm -> {
