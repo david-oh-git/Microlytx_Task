@@ -43,6 +43,8 @@ import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
 import io.davidosemwota.microlytxtask.R
 import io.davidosemwota.microlytxtask.ui.home.HomeViewModel
+import io.davidosemwota.microlytxtask.util.LATITUDE
+import io.davidosemwota.microlytxtask.util.LONGITUDE
 
 object DataSource {
 
@@ -58,21 +60,36 @@ object DataSource {
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
-        requestLocation(fusedLocationClient)
+        requestLocation(fusedLocationClient, viewModel)
         addNetworkAndCountryCode(mobileCountryCode, mobileNetworkCode, viewModel)
         addMobileTech(telephonyManager, viewModel, context)
+        addSignalStrength(telephonyManager, context, viewModel)
         addNetWorkOperator(networkOperator, viewModel)
         addDeviceDetails(viewModel)
         addLocation(locationManager, viewModel, context, fusedLocationClient)
     }
 
-    private fun requestLocation(fusedLocationClient: FusedLocationProviderClient) {
+    private fun requestLocation(
+        fusedLocationClient: FusedLocationProviderClient,
+        viewModel: HomeViewModel
+    ) {
 
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
                 for (location in locationResult.locations) {
                     // ...
+                    fusedLocationClient.lastLocation
+                        .addOnSuccessListener { bestLocation: Location? ->
+                            viewModel.addPhoneDetail(
+                                PhoneDetail(LONGITUDE, bestLocation?.longitude.toString()),
+                                true
+                            )
+                            viewModel.addPhoneDetail(
+                                PhoneDetail(LATITUDE, bestLocation?.latitude.toString()),
+                                true
+                            )
+                        }
                 }
             }
         }
@@ -88,6 +105,42 @@ object DataSource {
             locationCallback,
             Looper.getMainLooper()
         )
+    }
+
+    private fun addLocation(
+        locationManager: LocationManager,
+        viewModel: HomeViewModel,
+        context: Context,
+        fusedLocationClient: FusedLocationProviderClient
+    ) {
+
+        val locationRequest = LocationRequest.create()?.apply {
+            interval = 500
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        val builder = locationRequest?.let {
+            LocationSettingsRequest.Builder()
+                .addLocationRequest(it)
+        }
+        builder?.setAlwaysShow(true)
+
+        val client: SettingsClient = LocationServices.getSettingsClient(context)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
+
+        task.addOnSuccessListener { _ ->
+            // All location settings are satisfied. The client can initialize
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { bestLocation: Location? ->
+                    viewModel.addPhoneDetail(
+                        PhoneDetail(LONGITUDE, bestLocation?.longitude.toString())
+                    )
+                    viewModel.addPhoneDetail(
+                        PhoneDetail(LATITUDE, bestLocation?.latitude.toString())
+                    )
+                }
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -132,42 +185,6 @@ object DataSource {
         viewModel.addPhoneDetail(
             PhoneDetail("Item Model", Build.MODEL)
         )
-    }
-
-    private fun addLocation(
-        locationManager: LocationManager,
-        viewModel: HomeViewModel,
-        context: Context,
-        fusedLocationClient: FusedLocationProviderClient
-    ) {
-
-        val locationRequest = LocationRequest.create()?.apply {
-            interval = 500
-            fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-
-        val builder = locationRequest?.let {
-            LocationSettingsRequest.Builder()
-                .addLocationRequest(it)
-        }
-        builder?.setAlwaysShow(true)
-
-        val client: SettingsClient = LocationServices.getSettingsClient(context)
-        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
-
-        task.addOnSuccessListener { _ ->
-            // All location settings are satisfied. The client can initialize
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { bestLocation: Location? ->
-                    viewModel.addPhoneDetail(
-                        PhoneDetail("Longitude", bestLocation?.longitude.toString())
-                    )
-                    viewModel.addPhoneDetail(
-                        PhoneDetail("Latitude", bestLocation?.latitude.toString())
-                    )
-                }
-        }
     }
 
     private fun checkNetworkType(
@@ -240,6 +257,30 @@ object DataSource {
 
             TelephonyManager.NETWORK_TYPE_IWLAN -> {
             }
+        }
+    }
+
+    private fun addSignalStrength(
+        telephonyManager: TelephonyManager,
+        context: Context,
+        viewModel: HomeViewModel
+    ) {
+        val connectivityManager = context.getSystemService(
+            Context.CONNECTIVITY_SERVICE
+        ) as ConnectivityManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val currentNetwork = connectivityManager.activeNetwork
+            val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
+            val strength = caps?.signalStrength
+            viewModel.addPhoneDetail(
+                PhoneDetail("Signal Strength", strength.toString())
+            )
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+            val strength = telephonyManager.signalStrength
+            viewModel.addPhoneDetail(
+                PhoneDetail("Signal Strength 28", strength.toString())
+            )
         }
     }
 }

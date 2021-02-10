@@ -41,10 +41,9 @@ class AskPermissionsActivity : AppCompatActivity() {
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissions ->
 
-            val isGranted = ( false !in permissions.values)
+            val isGranted = (false !in permissions.values)
             if (isGranted)
                 launchActivity(MainActivity::class.java)
-
         }
 
     private lateinit var binding: AskPermisionActivityBinding

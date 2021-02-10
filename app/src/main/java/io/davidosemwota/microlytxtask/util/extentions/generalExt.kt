@@ -41,19 +41,19 @@ fun logd(tag: String, msg: String) {
  * Check if permissions have been granted.
  */
 fun isPermissionGranted(applicationContext: Context): Boolean =
+    ContextCompat.checkSelfPermission(
+        applicationContext,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED &&
         ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                        applicationContext,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+        applicationContext,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
 
 /**
  * To launch an activity.
  */
-fun <T> AppCompatActivity.launchActivity(activity: Class<T>){
-    startActivity( Intent(this, activity))
+fun <T> AppCompatActivity.launchActivity(activity: Class<T>) {
+    startActivity(Intent(this, activity))
     finish()
 }

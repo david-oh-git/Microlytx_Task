@@ -23,9 +23,7 @@
  */
 package io.davidosemwota.microlytxtask.ui.home
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -34,10 +32,10 @@ import android.os.Bundle
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import io.davidosemwota.microlytxtask.R
@@ -47,13 +45,14 @@ import io.davidosemwota.microlytxtask.databinding.FragmentHomeBinding
 import io.davidosemwota.microlytxtask.ui.extentions.observe
 import io.davidosemwota.microlytxtask.ui.extentions.setItemDecorationSpacing
 import io.davidosemwota.microlytxtask.ui.home.adaptor.PhoneDetailAdaptor
+import io.davidosemwota.microlytxtask.util.extentions.isPermissionGranted
 import io.davidosemwota.microlytxtask.util.extentions.logd
 import io.davidosemwota.microlytxtask.util.network.InternetCallback
 import io.davidosemwota.microlytxtask.util.network.NetworkChecker
 
 class HomeFragment : Fragment() {
 
-    private val logTag = "HomeFragment"
+    private val TAG = "HomeFragment"
 
     private lateinit var binding: FragmentHomeBinding
 
@@ -69,7 +68,6 @@ class HomeFragment : Fragment() {
         ) as LocationManager
 
         initInternetCallback()
-        checkNetworkType()
     }
 
     override fun onCreateView(
@@ -100,9 +98,17 @@ class HomeFragment : Fragment() {
     override fun onPause() {
         super.onPause()
 
+        Log.d(TAG, "onPause: yes ")
+
         callback?.let {
             NetworkChecker.unRegisterInternetAvailabilityCallback(requireContext(), it)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        logd(TAG, "onStart: ")
     }
 
     private fun setUpViews() {
@@ -110,11 +116,9 @@ class HomeFragment : Fragment() {
 
         val tm = requireContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-        if (isPermissionGranted()) {
-            DataSource.initialise(tm, viewModel, locationManager, requireContext())
-        }
+        reloadData(tm)
 
-        if (isPermissionGranted()) {
+        if (isPermissionGranted(requireContext())) {
             logd("HomeFragment", "permission granted")
             val cellLocation = tm.allCellInfo
 
@@ -137,9 +141,8 @@ class HomeFragment : Fragment() {
                     }
 
                     is CellInfoLte -> {
-                        val lteInfo = info as CellInfoLte
-                        val lac = lteInfo.cellIdentity.ci
-                        logd(logTag, "cell id $lac")
+                        val lac = info.cellIdentity.ci
+                        logd(TAG, "cell id $lac")
                         viewModel.addPhoneDetail(
                             PhoneDetail("Cell ID (CI)", lac.toString())
                         )
@@ -155,15 +158,11 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun isPermissionGranted(): Boolean =
-        ContextCompat.checkSelfPermission(
-            requireContext().applicationContext,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-            requireContext().applicationContext,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun reloadData(tm: TelephonyManager) {
+        if (isPermissionGranted(requireContext())) {
+            DataSource.initialise(tm, viewModel, locationManager, requireContext())
+        }
+    }
 
     private fun onDataChange(data: List<PhoneDetail>) {
         phoneDetailAdaptor.submitList(data)
@@ -189,7 +188,7 @@ class HomeFragment : Fragment() {
 
         val currentNetwork = connectivityManager.activeNetwork
         val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
-        val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
+//        val linkProperties = connectivityManager.getLinkProperties(currentNetwork)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val strength = caps?.signalStrength

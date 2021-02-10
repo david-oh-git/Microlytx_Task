@@ -31,6 +31,7 @@ import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
+import io.davidosemwota.microlytxtask.util.extentions.logd
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,6 +51,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         requestToEnableLocation()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+
+        logd("HomeFragme", "onRestart")
     }
 
     private fun requestToEnableLocation() {
