@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Microlytx Task</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="mobile_network_tech">Mobile Network Technology</string>
+    <string name="permission_ask_msg">Greetings ! \n This application needs permissions in order to display data. Information such as longitude and latitude  require the location permission while radio properties need the phone state permission. </string>
+    <string name="ask_permission_btn">Grant Permission</string>
 </resources>

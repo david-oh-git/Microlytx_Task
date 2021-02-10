@@ -21,20 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.davidosemwota.microlytxtask
+package io.davidosemwota.microlytxtask.ui.main
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import io.davidosemwota.microlytxtask.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -48,85 +43,18 @@ class MainActivity : AppCompatActivity() {
         get() = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
             locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
-    private var binding: ActivityMainBinding? = null
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            var isGranted: Boolean = false
-            for (perm in permissions) {
-                isGranted = perm.value
-            }
-            if (isGranted)
-                setContentView(binding?.root)
-        }
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        checkForPermission()
-        if (isPermissionGranted())
-            setContentView(binding?.root)
-
+        setContentView(binding.root)
         requestToEnableLocation()
-    }
-
-    private fun isPermissionGranted(): Boolean =
-        ContextCompat.checkSelfPermission(
-            applicationContext,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(
-            applicationContext,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-
-    private fun showInContextUI() {
-        val dialog = AlertDialog.Builder(applicationContext)
-            .setMessage("We need your permission")
-            .setNegativeButton("Cancel") {
-                _, _ ->
-                finish()
-            }
-            .setPositiveButton("Agree") {
-                _, _ ->
-                requestPermission()
-            }
-            .create()
-        dialog.show()
-    }
-
-    private fun checkForPermission() {
-        when {
-            isPermissionGranted() -> {
-            }
-
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                showInContextUI()
-            }
-
-            else -> {
-                requestPermission()
-            }
-        }
-    }
-
-    private fun requestPermission() {
-        requestPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE
-            )
-        )
     }
 
     private fun requestToEnableLocation() {
         if (!isLocationEnabled) {
-            val enableLocationDialog = AlertDialog.Builder(applicationContext)
+            val enableLocationDialog = AlertDialog.Builder(this)
                 .setTitle("Location services not active")
                 .setMessage("Please enable location services and GPS")
                 .setPositiveButton("Ok") { _, _ ->

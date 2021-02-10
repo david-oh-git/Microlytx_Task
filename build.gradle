@@ -5,6 +5,9 @@ import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
 
 apply from: "$rootProject.projectDir/gradle/git-hooks.gradle"
 buildscript {
+    ext {
+        kotlin_version = '1.4.30'
+    }
     repositories {
         google()
         jcenter()
@@ -14,6 +17,7 @@ buildscript {
         classpath Libs.Kotlin.gradle_plugin
         classpath Libs.ktlint
         classpath Libs.spotless
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

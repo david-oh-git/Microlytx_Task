@@ -85,6 +85,9 @@ dependencies {
     implementation Libs.AndroidX.Fragment.fragment
     implementation Libs.AndroidX.livedataktx
     implementation Libs.PlayServices.location
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"
