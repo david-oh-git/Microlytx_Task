@@ -42,12 +42,28 @@ class HomeViewModel : ViewModel() {
             .collect { emit(it) }
     }
 
-    fun addPhoneDetail(phoneDetail: PhoneDetail) = viewModelScope.launch {
-        val oldList = _listOfPhoneDetails.value
+    fun addPhoneDetail(
+        phoneDetail: PhoneDetail,
+        checkIfPresent: Boolean = false
+    ) = viewModelScope.launch {
+        val oldList = _listOfPhoneDetails.value.toMutableList()
+        if (checkIfPresent) {
+            val oldItem = oldList.find { it.title == phoneDetail.title }
+            oldList.remove(oldItem)
+            oldList.add(phoneDetail)
+            _listOfPhoneDetails.value = oldList
+
+            return@launch
+        }
+
         val newList = mutableSetOf<PhoneDetail>()
         newList.addAll(oldList)
         newList.add(phoneDetail)
 
         _listOfPhoneDetails.value = newList.toMutableList()
+    }
+
+    fun flushPhoneDetails() = viewModelScope.launch {
+        _listOfPhoneDetails.value = emptyList()
     }
 }

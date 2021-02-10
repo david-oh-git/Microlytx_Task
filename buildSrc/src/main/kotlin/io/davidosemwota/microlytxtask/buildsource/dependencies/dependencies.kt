@@ -48,6 +48,11 @@ object Libs {
         const val hilt_viewmodel_compiler = "androidx.hilt:hilt-lifecycle-viewmodel:$version"
     }
 
+    object PlayServices {
+        private const val version = "17.1.0"
+        const val location = "com.google.android.gms:play-services-location:$version"
+    }
+
     object AndroidX {
 
         const val livedataktx = "androidx.lifecycle:lifecycle-livedata-ktx:${Versions.lifecycle}"
