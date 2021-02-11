@@ -1,50 +1,53 @@
 import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
 import io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig
-
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.application_id
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.build_tools_version
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.compile_sdk_version
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.minimum_sdk_version
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.target_sdk_version
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.test_instrumentation_runner
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.version_code
-import static io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig.version_name
-
+import io.davidosemwota.microlytxtask.buildsource.BuildTypeDebug
+import io.davidosemwota.microlytxtask.buildsource.BuildTypeRelease
 
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
-    compileSdkVersion compile_sdk_version
-    buildToolsVersion build_tools_version
+    compileSdkVersion BuildAndroidConfig.compile_sdk_version
+    buildToolsVersion BuildAndroidConfig.build_tools_version
 
     defaultConfig {
-        applicationId application_id
-        minSdkVersion minimum_sdk_version
-        targetSdkVersion target_sdk_version
-        versionCode version_code
-        versionName version_name
+        applicationId BuildAndroidConfig.application_id
+        minSdkVersion BuildAndroidConfig.minimum_sdk_version
+        targetSdkVersion BuildAndroidConfig.target_sdk_version
+        versionCode BuildAndroidConfig.version_code
+        versionName BuildAndroidConfig.version_name
 
-        testInstrumentationRunner test_instrumentation_runner
+        testInstrumentationRunner BuildAndroidConfig.test_instrumentation_runner
     }
 
 //    signingConfigs {
-//        debug {
-//            storeFile rootProject.file("ulesson_debug.jks")
+//        getByName(BuildTypeDebug.debug) {
+//            storeFile rootProject.file("microlytx_debug.jks")
 //            storeFile 'android'
 //            keyAlias 'android'
 //            keyPassword 'android'
+//
+//            v2SigningEnabled true
 //        }
 //    }
+
     buildTypes {
-//        debug {
-//            applicationIdSuffix BuildTypeDebug.applicationIdSuffix
+
+        debug {
+//            applicationIdSuffix BuildTypeDebug.application_id_suffix
 //            signingConfigs = BuildType.debug
-//        }
-        release {
             minifyEnabled false
+        }
+
+//        getByName(BuildTypeDebug.debug) {
+//            minifyEnabled BuildTypeDebug.isMinifyEnabled
+//        }
+
+        release {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -52,6 +55,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }

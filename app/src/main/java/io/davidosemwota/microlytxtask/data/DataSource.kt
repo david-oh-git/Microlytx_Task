@@ -1,25 +1,6 @@
 /*
- * MIT License
  *
- * Copyright (c) 2021   David Osemwota.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * 2021 David Osemwota.
  */
 package io.davidosemwota.microlytxtask.data
 
@@ -30,6 +11,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Looper
 import android.telephony.CellInfoGsm
+import android.telephony.CellInfoLte
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -45,6 +27,7 @@ import io.davidosemwota.microlytxtask.R
 import io.davidosemwota.microlytxtask.ui.home.HomeViewModel
 import io.davidosemwota.microlytxtask.util.LATITUDE
 import io.davidosemwota.microlytxtask.util.LONGITUDE
+import io.davidosemwota.microlytxtask.util.extentions.logd
 
 object DataSource {
 
@@ -241,18 +224,6 @@ object DataSource {
                 viewModel.addPhoneDetail(
                     PhoneDetail(context.getString(R.string.mobile_network_tech), "GSM")
                 )
-
-                for (info in allCellInfo) {
-                    when (info) {
-                        is CellInfoGsm -> {
-                            if (info.isRegistered) {
-
-                                Log.d("HomeFragment", "LAC is: ${info.cellIdentity.lac}")
-                                Log.d("HomeFragment", "CID is: ${info.cellIdentity.cid}")
-                            }
-                        }
-                    }
-                }
             }
 
             TelephonyManager.NETWORK_TYPE_IWLAN -> {
@@ -269,18 +240,68 @@ object DataSource {
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val currentNetwork = connectivityManager.activeNetwork
-            val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
-            val strength = caps?.signalStrength
-            viewModel.addPhoneDetail(
-                PhoneDetail("Signal Strength", strength.toString())
-            )
-        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-            val strength = telephonyManager.signalStrength
-            viewModel.addPhoneDetail(
-                PhoneDetail("Signal Strength 28", strength.toString())
-            )
+        val cellLocation = telephonyManager.allCellInfo
+
+        for (info in cellLocation) {
+            when (info) {
+                is CellInfoGsm -> {
+                    val identityGsm = info.cellIdentity
+                    val lac = identityGsm.lac
+                    val cid = identityGsm.cid
+
+                    if (info.isRegistered) {
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Local Area Code (LAC)", lac.toString())
+                        )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell Identity (CID)", cid.toString())
+                        )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail(
+                                "Signal Strength",
+                                "${info.cellSignalStrength.dbm} dBm"
+                            )
+                        )
+                    }
+                }
+
+                is CellInfoLte -> {
+                    val lac = info.cellIdentity.ci
+
+                    if (info.isRegistered) {
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell ID (CI)", lac.toString())
+                        )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail(
+                                "Signal Strength",
+                                "${info.cellSignalStrength.dbm} dBm"
+                            )
+                        )
+                    }
+                }
+
+                else -> {
+                    logd("HomeFragment", "nothing matched")
+                }
+            }
         }
+
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            val currentNetwork = connectivityManager.activeNetwork
+//            val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
+//            val strength = caps?.signalStrength
+//            viewModel.addPhoneDetail(
+//                PhoneDetail("Signal Strength", strength.toString())
+//            )
+//        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+//            val strength = telephonyManager.signalStrength
+//            viewModel.addPhoneDetail(
+//                PhoneDetail("Signal Strength 28", strength.toString())
+//            )
+//        }
     }
 }
