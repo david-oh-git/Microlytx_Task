@@ -5,7 +5,6 @@
 package io.davidosemwota.microlytxtask.ui.home
 
 import android.content.Context
-import android.net.Network
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.view.LayoutInflater
@@ -21,8 +20,6 @@ import io.davidosemwota.microlytxtask.ui.extentions.observe
 import io.davidosemwota.microlytxtask.ui.extentions.setItemDecorationSpacing
 import io.davidosemwota.microlytxtask.ui.home.adaptor.PhoneDetailAdaptor
 import io.davidosemwota.microlytxtask.util.extentions.isPermissionGranted
-import io.davidosemwota.microlytxtask.util.network.InternetCallback
-import io.davidosemwota.microlytxtask.util.network.NetworkChecker
 
 class HomeFragment : Fragment() {
 
@@ -32,13 +29,6 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private val phoneDetailAdaptor by lazy { PhoneDetailAdaptor() }
-    private var callback: InternetCallback? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        initInternetCallback()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,30 +43,15 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val tm = requireContext().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-
         observe(viewModel.listOfPhoneDetails, ::onDataChange)
-        setUpViews(tm)
+        setUpViews()
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        callback?.let {
-            NetworkChecker.registerInternetAvailabilityCallback(requireContext(), it)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        callback?.let {
-            NetworkChecker.unRegisterInternetAvailabilityCallback(requireContext(), it)
-        }
-    }
-
-    private fun setUpViews(telephonyManager: TelephonyManager) {
+    private fun setUpViews() {
         setUpRecyclerView()
+
+        val telephonyManager = requireContext().getSystemService(Context.TELEPHONY_SERVICE)
+            as TelephonyManager
 
         reloadData(telephonyManager)
     }
@@ -97,39 +72,6 @@ class HomeFragment : Fragment() {
             setItemDecorationSpacing(
                 resources.getDimension(R.dimen.view_phone_detail_list_item_padding)
             )
-        }
-    }
-
-    private fun initInternetCallback() {
-
-        viewModel.addPhoneDetail(
-            PhoneDetail("Cell Connection Status", "Not Connected"),
-            true
-        )
-
-        callback = object : InternetCallback() {
-            override fun onNetworkInActive(network: Network?) {
-                viewModel.addPhoneDetail(
-                    PhoneDetail("Cell Connection Status", "Not Connected"),
-                    true
-                )
-            }
-
-            override fun onNetworkActive(network: Network) {
-                viewModel.addPhoneDetail(
-                    PhoneDetail("Cell Connection Status", "Connected"),
-                    true
-                )
-            }
-
-            override fun onLost(network: Network) {
-                super.onLost(network)
-
-                viewModel.addPhoneDetail(
-                    PhoneDetail("Cell Connection Status", "Not Connected"),
-                    true
-                )
-            }
         }
     }
 }

@@ -4,6 +4,7 @@
  */
 package io.davidosemwota.microlytxtask.data
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Build
@@ -12,7 +13,6 @@ import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
 import android.telephony.CellInfoWcdma
 import android.telephony.TelephonyManager
-import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -28,6 +28,7 @@ import io.davidosemwota.microlytxtask.util.LATITUDE
 import io.davidosemwota.microlytxtask.util.LONGITUDE
 import io.davidosemwota.microlytxtask.util.extentions.logd
 
+@SuppressLint("MissingPermission")
 object DataSource {
 
     fun initialise(
@@ -43,8 +44,7 @@ object DataSource {
 
         requestLocation(fusedLocationClient, viewModel)
         addNetworkAndCountryCode(mobileCountryCode, mobileNetworkCode, viewModel)
-        addMobileTech(telephonyManager, viewModel, context)
-        addSignalStrength(telephonyManager, viewModel)
+        addNetworkDetails(telephonyManager, context, viewModel)
         addNetWorkOperator(networkOperator, viewModel)
         addDeviceDetails(viewModel)
         addLocation(viewModel, context, fusedLocationClient)
@@ -109,7 +109,7 @@ object DataSource {
         val client: SettingsClient = LocationServices.getSettingsClient(context)
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder?.build())
 
-        task.addOnSuccessListener { _ ->
+        task.addOnSuccessListener {
             // All location settings are satisfied. The client can initialize
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { bestLocation: Location? ->
@@ -120,22 +120,6 @@ object DataSource {
                         PhoneDetail(LATITUDE, bestLocation?.latitude.toString())
                     )
                 }
-        }
-    }
-
-    @Suppress("DEPRECATION")
-    private fun addMobileTech(
-        telephonyManager: TelephonyManager,
-        viewModel: HomeViewModel,
-        context: Context
-    ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val network = telephonyManager.voiceNetworkType
-
-            checkNetworkType(network, viewModel, context)
-        } else {
-            val network = telephonyManager.networkType
-            checkNetworkType(network, viewModel, context)
         }
     }
 
@@ -167,69 +151,16 @@ object DataSource {
         )
     }
 
-    private fun checkNetworkType(
-        network: Int,
-        viewModel: HomeViewModel,
-        context: Context
-    ) {
-
-        val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-
-        val allCellInfo = tm.allCellInfo
-
-        when (network) {
-            TelephonyManager.NETWORK_TYPE_LTE -> {
-                viewModel.addPhoneDetail(
-                    PhoneDetail(context.getString(R.string.mobile_network_tech), "LTE")
-                )
-            }
-
-            TelephonyManager.NETWORK_TYPE_UMTS -> {
-                viewModel.addPhoneDetail(
-                    PhoneDetail(context.getString(R.string.mobile_network_tech), "3G")
-                )
-
-                for (info in allCellInfo) {
-                    when (info) {
-                        is CellInfoGsm -> {
-                            if (info.isRegistered) {
-
-                                Log.d("HomeFragment", "LAC is: ${info.cellIdentity.lac}")
-                                Log.d("HomeFragment", "CID is: ${info.cellIdentity.cid}")
-                            }
-                        }
-                    }
-                }
-            }
-
-            TelephonyManager.NETWORK_TYPE_EDGE -> {
-                viewModel.addPhoneDetail(
-                    PhoneDetail(context.getString(R.string.mobile_network_tech), "EDGE")
-                )
-            }
-
-            TelephonyManager.NETWORK_TYPE_GPRS -> {
-                viewModel.addPhoneDetail(
-                    PhoneDetail(context.getString(R.string.mobile_network_tech), "GPRS")
-                )
-            }
-
-            TelephonyManager.NETWORK_TYPE_GSM -> {
-                viewModel.addPhoneDetail(
-                    PhoneDetail(context.getString(R.string.mobile_network_tech), "GSM")
-                )
-            }
-
-            TelephonyManager.NETWORK_TYPE_IWLAN -> {
-            }
-        }
-    }
-
-    private fun addSignalStrength(
+    private fun addNetworkDetails(
         telephonyManager: TelephonyManager,
+        context: Context,
         viewModel: HomeViewModel
     ) {
         val cellLocation = telephonyManager.allCellInfo
+
+        viewModel.addPhoneDetail(
+            PhoneDetail("Cell Connection Status", "Not Connected")
+        )
 
         for (info in cellLocation) {
             when (info) {
@@ -237,10 +168,18 @@ object DataSource {
 
                     if (info.isRegistered) {
                         viewModel.addPhoneDetail(
+                            PhoneDetail(context.getString(R.string.mobile_network_tech), "GSM")
+                        )
+                        viewModel.addPhoneDetail(
                             PhoneDetail(
                                 "Signal Strength",
                                 "${info.cellSignalStrength.dbm} dBm"
                             )
+                        )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell Connection Status", "Connected",),
+                            true
                         )
                     }
                 }
@@ -248,6 +187,9 @@ object DataSource {
                 is CellInfoWcdma -> {
                     logd("HomeFragment", "3G matched")
                     if (info.isRegistered) {
+                        viewModel.addPhoneDetail(
+                            PhoneDetail(context.getString(R.string.mobile_network_tech), "3G")
+                        )
                         val lac = info.cellIdentity.lac
                         val cellIdentity = info.cellIdentity.cid
 
@@ -265,12 +207,20 @@ object DataSource {
                                 "${info.cellSignalStrength.dbm} dBm"
                             )
                         )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell Connection Status", "Connected"),
+                            true
+                        )
                     }
                 }
 
                 is CellInfoLte -> {
 
                     if (info.isRegistered) {
+                        viewModel.addPhoneDetail(
+                            PhoneDetail(context.getString(R.string.mobile_network_tech), "LTE")
+                        )
                         val cellIdentity = info.cellIdentity.ci
                         val tac = info.cellIdentity.tac
 
@@ -287,11 +237,20 @@ object DataSource {
                                 "${info.cellSignalStrength.dbm} dBm"
                             )
                         )
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell Connection Status", "Connected"),
+                            true
+                        )
                     }
                 }
 
                 else -> {
-                    logd("HomeFragment", "nothing matched")
+
+                    viewModel.addPhoneDetail(
+                        PhoneDetail("Cell Connection Status", "Not Connected"),
+                        true
+                    )
                 }
             }
         }

@@ -19,3 +19,12 @@ object Mockk {
     private const val version = "1.10.5"
     const val mockk = "io.mockk:mockk:$version"
 }
+
+object Espresso {
+    private const val version = "1.1.0"
+    private const val version_core = "3.1.0"
+
+    const val espresso_core = "androidx.test.espresso:espresso-core:$version_core"
+    const val espresso_runner = "androidx.test:runner:$version"
+    const val espresso_rules = "androidx.test:rules:$version"
+}
