@@ -6,12 +6,11 @@ package io.davidosemwota.microlytxtask.data
 
 import android.content.Context
 import android.location.Location
-import android.location.LocationManager
-import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Looper
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
+import android.telephony.CellInfoWcdma
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -34,7 +33,6 @@ object DataSource {
     fun initialise(
         telephonyManager: TelephonyManager,
         viewModel: HomeViewModel,
-        locationManager: LocationManager,
         context: Context
     ) {
         val mobileCountryCode = telephonyManager.networkCountryIso
@@ -46,10 +44,10 @@ object DataSource {
         requestLocation(fusedLocationClient, viewModel)
         addNetworkAndCountryCode(mobileCountryCode, mobileNetworkCode, viewModel)
         addMobileTech(telephonyManager, viewModel, context)
-        addSignalStrength(telephonyManager, context, viewModel)
+        addSignalStrength(telephonyManager, viewModel)
         addNetWorkOperator(networkOperator, viewModel)
         addDeviceDetails(viewModel)
-        addLocation(locationManager, viewModel, context, fusedLocationClient)
+        addLocation(viewModel, context, fusedLocationClient)
     }
 
     private fun requestLocation(
@@ -91,7 +89,6 @@ object DataSource {
     }
 
     private fun addLocation(
-        locationManager: LocationManager,
         viewModel: HomeViewModel,
         context: Context,
         fusedLocationClient: FusedLocationProviderClient
@@ -175,9 +172,6 @@ object DataSource {
         viewModel: HomeViewModel,
         context: Context
     ) {
-        val cm = context.getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
 
         val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
@@ -233,29 +227,36 @@ object DataSource {
 
     private fun addSignalStrength(
         telephonyManager: TelephonyManager,
-        context: Context,
         viewModel: HomeViewModel
     ) {
-        val connectivityManager = context.getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-
         val cellLocation = telephonyManager.allCellInfo
 
         for (info in cellLocation) {
             when (info) {
                 is CellInfoGsm -> {
-                    val identityGsm = info.cellIdentity
-                    val lac = identityGsm.lac
-                    val cid = identityGsm.cid
 
                     if (info.isRegistered) {
                         viewModel.addPhoneDetail(
-                            PhoneDetail("Local Area Code (LAC)", lac.toString())
+                            PhoneDetail(
+                                "Signal Strength",
+                                "${info.cellSignalStrength.dbm} dBm"
+                            )
+                        )
+                    }
+                }
+
+                is CellInfoWcdma -> {
+                    logd("HomeFragment", "3G matched")
+                    if (info.isRegistered) {
+                        val lac = info.cellIdentity.lac
+                        val cellIdentity = info.cellIdentity.cid
+
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Local Area Code (LAC", lac.toString())
                         )
 
                         viewModel.addPhoneDetail(
-                            PhoneDetail("Cell Identity (CID)", cid.toString())
+                            PhoneDetail("Cell Identity (CID)", cellIdentity.toString())
                         )
 
                         viewModel.addPhoneDetail(
@@ -268,11 +269,16 @@ object DataSource {
                 }
 
                 is CellInfoLte -> {
-                    val lac = info.cellIdentity.ci
 
                     if (info.isRegistered) {
+                        val cellIdentity = info.cellIdentity.ci
+                        val tac = info.cellIdentity.tac
+
                         viewModel.addPhoneDetail(
-                            PhoneDetail("Cell ID (CI)", lac.toString())
+                            PhoneDetail("Local Area Code (LAC)", tac.toString())
+                        )
+                        viewModel.addPhoneDetail(
+                            PhoneDetail("Cell ID (CI)", cellIdentity.toString())
                         )
 
                         viewModel.addPhoneDetail(
@@ -289,19 +295,5 @@ object DataSource {
                 }
             }
         }
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            val currentNetwork = connectivityManager.activeNetwork
-//            val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
-//            val strength = caps?.signalStrength
-//            viewModel.addPhoneDetail(
-//                PhoneDetail("Signal Strength", strength.toString())
-//            )
-//        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-//            val strength = telephonyManager.signalStrength
-//            viewModel.addPhoneDetail(
-//                PhoneDetail("Signal Strength 28", strength.toString())
-//            )
-//        }
     }
 }
