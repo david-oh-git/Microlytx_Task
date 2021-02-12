@@ -54,5 +54,5 @@ jobs:
         with:
           tag_name: v1.0
           asset_path: app/build/outputs/universal_apk/debug/app-debug-universal.apk
-          asset_name: ulesson_debug.apk
+          asset_name: microlytx_debug.apk
           asset_content_type: application/zip
