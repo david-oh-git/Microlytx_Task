@@ -2,6 +2,7 @@ import io.davidosemwota.microlytxtask.buildsource.dependencies.Libs
 import io.davidosemwota.microlytxtask.buildsource.BuildAndroidConfig
 import io.davidosemwota.microlytxtask.buildsource.BuildTypeDebug
 import io.davidosemwota.microlytxtask.buildsource.BuildTypeRelease
+import io.davidosemwota.microlytxtask.buildsource.BuildType
 
 plugins {
     id 'com.android.application'
@@ -23,7 +24,7 @@ android {
         testInstrumentationRunner BuildAndroidConfig.test_instrumentation_runner
     }
 
-//    signingConfigs {
+    signingConfigs {
 //        getByName(BuildTypeDebug.debug) {
 //            storeFile rootProject.file("microlytx_debug.jks")
 //            storeFile 'android'
@@ -32,13 +33,13 @@ android {
 //
 //            v2SigningEnabled true
 //        }
-//    }
+    }
 
     buildTypes {
 
         debug {
 //            applicationIdSuffix BuildTypeDebug.application_id_suffix
-//            signingConfigs = BuildType.debug
+//            signingConfigs  BuildType.debug
             minifyEnabled false
         }
 
@@ -89,9 +90,6 @@ dependencies {
     implementation Libs.AndroidX.Fragment.fragment
     implementation Libs.AndroidX.livedataktx
     implementation Libs.PlayServices.location
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 }
 
 apply from: "$rootProject.projectDir/gradle/ktlint.gradle"
